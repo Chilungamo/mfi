@@ -15,3 +15,5 @@ __pycache__/
 coverage.xml
 htmlcov/
 postgres-data/
+.coverage
+*.egg-info/

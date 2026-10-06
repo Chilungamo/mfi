@@ -1,30 +1,36 @@
-.PHONY: install db-up db-down db-init api test lint typecheck check
+.PHONY: install services-up services-down db-init api test test-integration lint format typecheck check
 
 install:
-	python -m pip install -e '.[dev,ingestion]'
+	uv sync --extra dev
 
-db-up:
-	docker compose up -d postgres
+services-up:
+	docker compose up -d
 
-db-down:
+services-down:
 	docker compose down
 
 db-init:
-	python scripts/init_db.py
+	uv run python scripts/init_db.py
 
 api:
-	uvicorn app.main:app --reload
+	uv run uvicorn app.main:app --reload
 
 test:
-	pytest
+	uv run pytest
+
+# Needs an empty, disposable database, e.g.
+# AL_MFI_TEST_DATABASE_URL=postgresql://al_mfi:al_mfi@localhost:5432/al_mfi_test
+test-integration:
+	uv run pytest tests/integration
 
 lint:
-	ruff check .
+	uv run ruff check .
+	uv run ruff format --check .
 
 format:
-	ruff format .
+	uv run ruff format .
 
 typecheck:
-	pyright
+	uv run pyright
 
 check: lint typecheck test

@@ -1,0 +1,44 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: al_mfi
+          POSTGRES_USER: al_mfi
+          POSTGRES_PASSWORD: ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://al_mfi:ci@localhost:5432/al_mfi
+      AL_MFI_TEST_DATABASE_URL: postgresql://al_mfi:ci@localhost:5432/al_mfi_test
+      S3_ACCESS_KEY: ci
+      S3_SECRET_KEY: ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install (exactly what uv.lock pins)
+        run: uv sync --frozen --extra dev
+      - name: Lint and format
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: Typecheck
+        run: uv run pyright
+      - name: Build the database from migrations, seeds and checks
+        run: uv run python scripts/init_db.py
+      - name: Re-run is a no-op (migrations skipped, seeds idempotent)
+        run: uv run python scripts/init_db.py
+      - name: Create empty database for integration tests
+        run: psql postgresql://al_mfi:ci@localhost:5432/al_mfi -c "CREATE DATABASE al_mfi_test"
+      - name: Tests (unit + integration)
+        run: uv run pytest --cov=app --cov-report=term-missing

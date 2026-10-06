@@ -6,7 +6,7 @@ Every step is one reviewed commit. Decisions behind the mapping: [`docs/adr/`](a
 | Step | Deliverable | Guide § | Guide due date | Status |
 |---|---|---|---|---|
 | 1 | Merge decisions (ADRs 0001–0006) and this roadmap | all | — | ✅ Done |
-| 2 | Tooling: uv + `uv.lock`, Python 3.12, MinIO in Docker Compose, extended settings (S3, user agent, extractor version, API DB URL), GitHub Actions CI against Postgres 16 | 1, 11 | 2026-11-15 | ☐ |
+| 2 | Tooling: uv + `uv.lock`, Python 3.12, MinIO in Docker Compose, extended settings (S3, user agent, extractor version, API DB URL), GitHub Actions CI against Postgres 16 | 1, 11 | 2026-11-15 | ✅ Done |
 | 3 | Migration 003: append-only facts (ADR 0006), `license_tag`, `auth` schema; `db/roles/000_roles.sql`; trigger tests | 2, 10 | 2026-11-30 | ☐ |
 | 4 | Seeds: reporting bases (IFRS, IFRS_SME, IPSAS_CASH, IPSAS_MOD_CASH, IPSAS_MOD_ACCRUAL, IPSAS_ACCRUAL); 17 MSE-listed companies; NSO district codes. CSV-backed, idempotent | 2 | 2026-11-30 | ☐ |
 | 5 | Taxonomies: `ref.taxonomy_relationship`; Arelle IFRS loader; `mw-co` / `mw-ps` / `mw-stat` extension CSVs; GFS concept maps; ~40-item v1 concept list | 3 | 2026-11-30 | ☐ |
