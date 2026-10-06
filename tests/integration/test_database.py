@@ -3,29 +3,12 @@
 The target database must be empty and disposable: migrations and seeds are applied to it.
 """
 
-import os
 from datetime import date
 from pathlib import Path
 
 import pytest
 
 psycopg = pytest.importorskip("psycopg")
-
-DSN = os.environ.get("AL_MFI_TEST_DATABASE_URL")
-pytestmark = pytest.mark.skipif(not DSN, reason="AL_MFI_TEST_DATABASE_URL not set")
-
-
-@pytest.fixture(scope="module")
-def conn(repo_root: Path):
-    assert DSN is not None
-    with psycopg.connect(DSN, autocommit=True) as c:
-        for sub in ("migrations", "seeds"):
-            for path in sorted((repo_root / "db" / sub).glob("*.sql")):
-                c.execute(path.read_text())
-        # seeds must be re-runnable
-        for path in sorted((repo_root / "db" / "seeds").glob("*.sql")):
-            c.execute(path.read_text())
-        yield c
 
 
 def test_districts_seeded(conn) -> None:

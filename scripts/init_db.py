@@ -1,4 +1,4 @@
-"""Apply migrations, seeds and schema checks to the configured database, in order.
+"""Apply roles, migrations, seeds and schema checks to the configured database, in order.
 
 Usage: python scripts/init_db.py [--skip-seeds] [--skip-checks]
 """
@@ -10,6 +10,7 @@ from pathlib import Path
 import psycopg
 
 ROOT = Path(__file__).resolve().parent.parent
+ROLES = ROOT / "db" / "roles"
 MIGRATIONS = ROOT / "db" / "migrations"
 SEEDS = ROOT / "db" / "seeds"
 CHECKS = ROOT / "db" / "checks"
@@ -17,10 +18,11 @@ CHECKS = ROOT / "db" / "checks"
 
 def _dsn() -> str:
     sys.path.insert(0, str(ROOT))
-    from app.config import get_settings
+    from app.config import get_database_settings
 
-    # psycopg expects a libpq URL, not a SQLAlchemy dialect URL.
-    return get_settings().database_url.replace("postgresql+psycopg://", "postgresql://", 1)
+    # Only the database URL is needed here; S3 secrets are not. psycopg expects a libpq URL,
+    # not a SQLAlchemy dialect URL.
+    return get_database_settings().database_url.replace("postgresql+psycopg://", "postgresql://", 1)
 
 
 def sql_files(directory: Path) -> list[Path]:
@@ -62,6 +64,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     with psycopg.connect(_dsn(), autocommit=True) as conn:
+        # Roles are cluster-level and idempotent; re-applied every run, before migrations.
+        print("Roles:")
+        for path in sql_files(ROLES):
+            apply(conn, path)
+
         applied = ensure_migration_table(conn)
         print("Migrations:")
         for path in sql_files(MIGRATIONS):

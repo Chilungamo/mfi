@@ -12,3 +12,4 @@ never by editing history.
 | [0004](0004-layout-tooling-migrations.md) | Keep `app/`, adopt uv and Python 3.12, keep `init_db.py` | Accepted |
 | [0005](0005-forward-only-migrations.md) | Forward-only numbered migrations | Accepted |
 | [0006](0006-append-only-facts.md) | Append-only facts enforced in the database | Accepted |
+| [0007](0007-licences-and-roles.md) | Licence tags, API keys and database roles | Accepted |

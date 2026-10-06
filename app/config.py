@@ -10,16 +10,23 @@ from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):
+class DatabaseSettings(BaseSettings):
+    """Just enough to reach the database: what migration and admin tools need."""
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    # Migrations run as the owner; pipelines connect as al_mfi_pipeline.
+    database_url: str = "postgresql+psycopg://al_mfi:al_mfi@localhost:5432/al_mfi"
+
+
+class Settings(DatabaseSettings):
+    """Full application settings: services that touch the archive need the S3 secrets."""
 
     app_env: str = "development"
     app_name: str = "AL-MFI-001"
     app_version: str = "0.2.0"
 
-    # Pipelines and migrations connect with this URL (role mmd_pipeline / owner).
-    database_url: str = "postgresql+psycopg://al_mfi:al_mfi@localhost:5432/al_mfi"
-    # The read-only API connects separately (role mmd_api); falls back to database_url locally.
+    # The read-only API connects separately (role al_mfi_api); falls back to database_url locally.
     api_database_url: str | None = None
 
     # Raw archive: S3-compatible object storage. Endpoint is None on AWS, MinIO URL locally.
@@ -37,6 +44,11 @@ class Settings(BaseSettings):
     @property
     def effective_api_database_url(self) -> str:
         return self.api_database_url or self.database_url
+
+
+@lru_cache
+def get_database_settings() -> DatabaseSettings:
+    return DatabaseSettings()
 
 
 @lru_cache
