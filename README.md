@@ -275,6 +275,12 @@ research-facing company / institution / district view
 
 The first production-quality data should prove that one source can simultaneously contribute financial, institutional, geographic and temporal information.
 
+## Roadmap and decisions
+
+The build plan from the *Malawi Markets Data: Tech Stack Implementation Guide* has been merged
+into this repository. See [`docs/roadmap.md`](docs/roadmap.md) for the step-by-step plan and
+[`docs/adr/`](docs/adr/README.md) for the decisions behind it.
+
 ## Repository scaffold v0.2
 
 The v0.2 implementation repository is organized as a modular monolith:
